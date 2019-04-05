@@ -11,25 +11,6 @@ https://github.com/ScriptedAdventures
 https://www.scriptedadventures.net/
 #>
 
-Import-Module ActiveDirectory
-
-#Password Generator
-function Make-Password {
-    $PasswordSamplesArray = "!@#$%^&*()1234567890qwertyuiopasdfghjklzxcvbnm;,./{}:<>?".tochararray()
-    $PasswordOut = (($PasswordSamplesArray | Get-Random -Count '24') -join '')
-    return $PasswordOut
-    }
-$ADPassword = Make-Password
-
-#AD User Creation for Scheduled Task
-$ADUserName = "BPUpdater.svc"
-$ADDescription = "Service Account For BPUpdater Scheduled Task"
-$ADDisplayName = "BP Updater Service Account"
-$ADUser = $env:USERDNSDOMAIN + $ADUserName
-
-New-ADUser -Name $ADUserName -AccountPassword $ADPassword -Description $ADDescription -DisplayName $ADDisplayName -PasswordNeverExpires
-Add-ADGroupMember -Identity "Domain Admins" -Members $ADUserName
-
 #set up dir, and share name
 $ProgDataDir = $env:ALLUSERSPROFILE + "\BPUpdater"
 $PBSDataDir = $ProgDataDir + "\PBSData"
@@ -42,13 +23,9 @@ $ShareUNC = "\\" + $MachineName + "\" + $PBSShareName
 #scheduled task paramaters 
 $Action = New-ScheduledTaskAction -Execute $($ScriptLocation)
 $Trigger = New-ScheduledTaskTrigger -Daily -At 2AM
-$Principal = $ADUser
-Register-ScheduledTask -TaskName "BPUpdater Daily" -Trigger $Trigger -User $Principal -Action $Action
-
-
+$Principal = New-ScheduledTaskPrincipal -GroupId "NT AUTHORITY\SYSTEM" -LogonType ServiceAccount -RunLevel Highest 
+Register-ScheduledTask -TaskName "BPUpdater_Daily_2AM" -Principal $Principal -Trigger $Trigger -Action $Action -AsJob -RunLevel Highest -Force
 #checks, if not found will create share out of $PBSDataDir (admin share)
 if(!(Test-Path $ShareUNC)){
     New-SmbShare -Name $PBSShareName -Path $PBSDataDir -Description "Admin Share for PBS Data Update Files" 
 }
-
-

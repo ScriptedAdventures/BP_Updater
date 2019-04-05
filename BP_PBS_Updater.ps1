@@ -168,7 +168,7 @@ foreach ($TargetMachine in $global:TargetMachines) {
         ([WMICLASS]"\\$($TargetMachine.Name)\ROOT\CIMV2:win32_process").Create("$($PBSexePath) /s") | Out-Null
         }
     $InstallSent = $true
-    $InstallSentTime = (Get-Date -Format -g)
+    $InstallSentTime = (Get-Date -Format g)
     $Record["Install Sent"] = $InstallSentTime
     $objRecord = New-Object PSObject -Property $Record
     $global:Table += $objRecord
