@@ -22,11 +22,11 @@ $PBSDataDir = $ProgDataDir + "\PBSData"
 $LogDir = $ProgDataDir + "\Log"
 $ScriptLocation = $ProgDataDir + "\BP_PBS_Updater.ps1"
 $PBSShareName = "PBSData$"
-$MachineName = hostname
+$MachineName = HOSTNAME.EXE
 $ShareUNC = "\\" + $MachineName + "\" + $PBSShareName
 
 #tests if program data path exists, if not creates it and subfolders
-IF(!(Test-Path -Path $ProgDataDir)) {
+IF (!(Test-Path -Path $ProgDataDir)) {
     New-Item -ItemType Directory -Path $ProgDataDir
     New-Item -ItemType Directory -Path $PBSDataDir
     New-Item -ItemType Directory -Path $LogDir
@@ -41,6 +41,6 @@ $TaskTrigger = New-ScheduledTaskTrigger -Daily -At 2AM
 $TaskPrincipal = New-ScheduledTaskPrincipal -UserId "NT AUTHORITY\SYSTEM" -LogonType ServiceAccount -RunLevel Highest 
 Register-ScheduledTask -TaskName $TaskName -Principal $TaskPrincipal -Trigger $TaskTrigger -Action $TaskAction -Force
 #checks, if not found will create share out of $PBSDataDir (admin share)
-if(!(Test-Path $ShareUNC)){
-    New-SmbShare -Name $PBSShareName -Path $PBSDataDir -Description "Admin Share for PBS Data Update Files" 
+if (!(Test-Path $ShareUNC)) {
+    New-SmbShare -Name $PBSShareName -Path $PBSDataDir -Description "Admin Share for PBS Data Update Files" -ReadAccess "Everybody"
 }
