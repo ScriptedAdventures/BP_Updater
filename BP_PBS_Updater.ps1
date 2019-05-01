@@ -85,7 +85,7 @@ else {
 # Query all links on site that contain inc.exe, save uri in variable and split path to set filename in a variable
 $functionTime = Get-Date -Format g
 Add-Content $LogFile "$functionTime > Checking $global:DLPageBP for Updates"
-$DLQuery = (Invoke-WebRequest $global:DLPageBP ).links.href | Select-String -Pattern "inc.exe"
+$DLQuery = @((Invoke-WebRequest $global:DLPageBP ).links.href | Select-String -Pattern "inc.exe")
 $DLQResult = $DLQuery | Select-Object -First 1
 $URI = $DLQResult
 $global:FileName = Split-Path $URI -Leaf
