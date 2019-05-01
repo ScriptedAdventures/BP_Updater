@@ -36,7 +36,7 @@ IF (!(Test-Path -Path $ProgDataDir)) {
 
 #scheduled task paramaters 
 $TaskName = "BPUpdater_Daily_2AM"
-$TaskAction = New-ScheduledTaskAction -Execute Powershell.exe -Argument "-File $($ScriptLocation) -NonInteractive"
+$TaskAction = New-ScheduledTaskAction -Execute Powershell.exe -Argument "PowerShell -ExecutionPolicy Bypass -File $($ScriptLocation) -NonInteractive"
 $TaskTrigger = New-ScheduledTaskTrigger -Daily -At 2AM
 $TaskPrincipal = New-ScheduledTaskPrincipal -UserId "NT AUTHORITY\SYSTEM" -LogonType ServiceAccount -RunLevel Highest 
 Register-ScheduledTask -TaskName $TaskName -Principal $TaskPrincipal -Trigger $TaskTrigger -Action $TaskAction -Force
