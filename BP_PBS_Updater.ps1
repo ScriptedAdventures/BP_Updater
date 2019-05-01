@@ -37,7 +37,7 @@ $PBSVerLog = $LogDir + $PBSVerLogName
 $global:PBSDataServ = $global:CentralServerName + $BPU_ShareName
 
 $global:PBSDir = $PBSFolder
-IF(!(Test-Path $LogDir)) {
+IF (!(Test-Path $LogDir)) {
     New-Item -ItemType Directory -Path $LogDir
 }
 IF (!(Test-Path $global:PBSDir)) {
@@ -57,12 +57,12 @@ Add-Content $LogFile "$functionTime > Adding TLS 1.1 & 1.2 to allow communicatio
 $global:Table = @()
 # Create Ordered Hashtable for data collection
 $Record = [ordered] @{
-    "Server" = ""
+    "Server"             = ""
     "PBS Update Version" = ""
-    "Needs Update" = ""
-    "Files Sent" = ""
-    "Install Sent" = ""
-    "Error" = ""
+    "Needs Update"       = ""
+    "Files Sent"         = ""
+    "Install Sent"       = ""
+    "Error"              = ""
 }
 
 # Creates Function for querying current PBSVersion
@@ -70,26 +70,8 @@ function Get-PBSVersion {
     Get-ItemProperty -Path "HKLM:\SOFTWARE\WOW6432Node\Best Practice Software\Best Practice\General" -Name "PBS"
 }
 
-# Creates Function for copying Installer to Target Machine
-<#
-function Copy-PBSData {
-        IF(!(Test-Path)) {
-            Write-Host "Creating $global:Dir"
-        New-Item -ItemType Directory -Force -Path $global:Dir
-        }
-        Write-Host "copying data from $global:PBSDataServ to $global:PBSDir"
-        Robocopy.exe $global:PBSDataServ $global:PBSDir *.exe /ZB
-}
-#>
-
-<#
-function Install-PBSData {
-        Start-Job -FilePath ($global:Dir + $global:FileName) -ArgumentList "/s"
-}
-#>
-
 # Query if paths exists, if it does not, creates it
-If(!(Test-Path $global:Dir)) {
+If (!(Test-Path $global:Dir)) {
     $functionTime = Get-Date -Format g 
     New-Item -ItemType Directory -Force -Path $global:Dir
     Add-Content $LogFile "$functionTime > WARNING: Directory $($global:Dir) Not Found, Created automatically"
@@ -117,7 +99,7 @@ $Clean2 = $Clean1 -replace "_inc.exe" , ""
 $global:LatestVersion = $($Clean2)
 
 # Downloads Drug Updates if file does not already exist
-IF(!(Test-Path $OutFile)) {
+IF (!(Test-Path $OutFile)) {
     $functionTime = Get-Date -Format g
     $DLStartTime = Get-Date
     Add-Content $LogFile "$functionTime > $global:FileName Downloaded Started "
@@ -137,20 +119,20 @@ foreach ($TargetMachine in $global:TargetMachines) {
     if ($global:PBSVersion -match $global:LatestVersion) {
         $NeedsUpdate = "No"
     }
-    else {$NeedsUpdate = "Yes"}
+    else { $NeedsUpdate = "Yes" }
     $Record["Server"] = $TargetMachine.Name 
     $Record["PBS Update Version"] = $global:PBSVersion.PBS
     $Record["Needs Update"] = $($NeedsUpdate)
     if ($NeedsUpdate -match "Yes") {
         $localPath = $env:ALLUSERSPROFILE + "\BPUpdater\PBSData\" 
         Invoke-Command -ComputerName $TargetMachine.Name -ScriptBlock {
-        if(!(Test-Path $Using:localPath)){
-            mkdir $Using:localPath -Force
-        }
+            if (!(Test-Path $Using:localPath)) {
+                mkdir $Using:localPath -Force
+            }
         }
         $DestStr = "\\" + $TargetMachine.Name + "\C$\ProgramData\BPUpdater\PBSData\" + $global:FileName
         $SrcStr = $global:PBSDataServ + $global:FileName
-        if(!(Test-Path $DestStr)) {
+        if (!(Test-Path $DestStr)) {
             Start-BitsTransfer -Source $SrcStr -Destination $DestStr
             Add-Content $LogFile "$functionTime > Copying $global:FileName to $($TargetMachine.Name), location on target = $DestStr"
         }
@@ -166,11 +148,11 @@ foreach ($TargetMachine in $global:TargetMachines) {
         $PBSexePath = $DestStr
         Add-Content $LogFile "$functionTime > Install invoked on $($TargetMachine.Name) "
         ([WMICLASS]"\\$($TargetMachine.Name)\ROOT\CIMV2:win32_process").Create("$($PBSexePath) /s") | Out-Null
-        }
-    $InstallSent = $true
-    $InstallSentTime = (Get-Date -Format -g)
-    $Record["Install Sent"] = $InstallSentTime
+        $InstallSent = $true
+        $InstallSentTime = (Get-Date -Format g)
+        $Record["Install Sent"] = $InstallSentTime}
+    
     $objRecord = New-Object PSObject -Property $Record
     $global:Table += $objRecord
-    }
-$Table | Export-CSV -Path $($PBSVerLog) -NoClobber -NoTypeInformation
+}
+$Table | Export-Csv -Path $($PBSVerLog) -NoClobber -NoTypeInformation
