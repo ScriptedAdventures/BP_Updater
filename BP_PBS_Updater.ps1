@@ -35,6 +35,7 @@ $TargetMachineADGroup = "BPAutoUpdate"
 $global:TargetMachines = Get-ADGroupMember -Identity $TargetMachineADGroup
 $PBSVerLog = $LogDir + $PBSVerLogName
 $global:PBSDataServ = $global:CentralServerName + $BPU_ShareName
+$global:DLPageBP = "https://bpsoftware.net/resources/bp-premier-downloads/"
 
 $global:PBSDir = $PBSFolder
 IF (!(Test-Path $LogDir)) {
@@ -83,9 +84,8 @@ else {
 
 # Query all links on site that contain inc.exe, save uri in variable and split path to set filename in a variable
 $functionTime = Get-Date -Format g
-Add-Content $LogFile "$functionTime > Checking $DLPageBP for Updates"
-$DLPageBP = "https://bpsoftware.net/resources/bp-premier-downloads/"
-$DLQuery = (Invoke-WebRequest $DLPageBP ).links.href | Select-String -Pattern "inc.exe"
+Add-Content $LogFile "$functionTime > Checking $global:DLPageBP for Updates"
+$DLQuery = (Invoke-WebRequest $global:DLPageBP ).links.href | Select-String -Pattern "inc.exe"
 $DLQResult = $DLQuery | Select-Object -First 1
 $URI = $DLQResult
 $global:FileName = Split-Path $URI -Leaf
