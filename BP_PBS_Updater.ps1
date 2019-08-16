@@ -87,9 +87,8 @@ $functionTime = Get-Date -Format g
 Add-Content $LogFile "$functionTime > Checking $global:DLPageBP for Updates"
 $DLQuery = @((Invoke-WebRequest $global:DLPageBP ).links.href | Select-String -Pattern "inc.exe")
 $DLQResult = $DLQuery | Select-Object -First 1
-$URI = $DLQResult
 $global:FileName = Split-Path $URI -Leaf
-$OutFile = $global:PBSDir + $global:FileName
+$OutFile = $PBSFolder + $global:FileName
 $functionTime = Get-Date -Format g
 Add-Content $LogFile "$functionTime > Found Update At $URI "
 
@@ -103,7 +102,7 @@ IF (!(Test-Path $OutFile)) {
     $functionTime = Get-Date -Format g
     $DLStartTime = Get-Date
     Add-Content $LogFile "$functionTime > $global:FileName Downloaded Started "
-    (New-Object System.Net.WebClient).DownloadFile("$URI" , $OutFile)
+    (New-Object System.Net.WebClient).DownloadFile("$DLQResult" , $OutFile)
     Add-Content $LogFile "$functionTime > $global:FileName SUCCESS: Download Completed in $((Get-Date).subtract($DLStartTime).seconds) Second(s) "
 }
 else {
