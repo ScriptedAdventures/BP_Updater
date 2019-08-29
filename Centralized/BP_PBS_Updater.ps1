@@ -27,22 +27,21 @@ $LogName = "Log.file"
 $LogDir = $global:InstallDir + "Log\"
 $LogFile = $LogDir + $LogName
 $PBSVerLogName = "PBSVersionReport" + "_" + $RunDate + ".csv"
-$PBSFolder = $global:InstallDir + "PBSData\"
-$global:PBSUpdates = $PBSFolder
+$global:PBSFolder = $global:InstallDir + "PBSData\"
+$global:PBSUpdates = $global:PBSFolder
 $BPU_ShareName = "PBSData$\"
-$BPU_SharePath = $PBSFolder
+$BPU_SharePath = $global:PBSFolder
 $TargetMachineADGroup = "BPAutoUpdate"
 $global:TargetMachines = Get-ADGroupMember -Identity $TargetMachineADGroup
 $PBSVerLog = $LogDir + $PBSVerLogName
 $global:PBSDataServ = $global:CentralServerName + $BPU_ShareName
 $global:DLPageBP = "https://bpsoftware.net/resources/bp-premier-downloads/"
 
-$global:PBSDir = $PBSFolder
 IF (!(Test-Path $LogDir)) {
     New-Item -ItemType Directory -Path $LogDir
 }
-IF (!(Test-Path $global:PBSDir)) {
-    New-Item -ItemType Directory -Path $global:PBSDir
+IF (!(Test-Path $global:PBSFolder)) {
+    New-Item -ItemType Directory -Path $global:PBSFolder
 }
 
 # Set up environment for script to run in, installs necessary modules
@@ -87,10 +86,10 @@ $functionTime = Get-Date -Format g
 Add-Content $LogFile "$functionTime > Checking $global:DLPageBP for Updates"
 $DLQuery = @((Invoke-WebRequest $global:DLPageBP ).links.href | Select-String -Pattern "inc.exe")
 $DLQResult = $DLQuery | Select-Object -First 1
-$global:FileName = Split-Path $URI -Leaf
-$OutFile = $PBSFolder + $global:FileName
+$global:FileName = Split-Path $DLQResult -Leaf
+$OutFile = $global:PBSFolder + $global:FileName
 $functionTime = Get-Date -Format g
-Add-Content $LogFile "$functionTime > Found Update At $URI "
+Add-Content $LogFile "$functionTime > Found Update At $DLQResult "
 
 # Clean up version number for comparison
 $Clean1 = $global:FileName -replace "BPS_Data_" , ""
