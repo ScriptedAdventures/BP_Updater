@@ -75,7 +75,7 @@ $LatestVersion = $($Clean2)
 
 IF (!(Test-Path $OutFile)) { 
     $functionTime = Get-Date -Format g
-    $DLStartTime = Get-Date -format g 
+    $DLStartTime = Get-Date
     Add-Content $LogFile "$functionTime > $FileName Download Started "
     (New-Object System.Net.WebClient).DownloadFile("$DLQResult" , "$OutFile")
     Add-Content $LogFile "$functionTime > $FileName SUCCESS: Download Completed in $((Get-Date).subtract($DLStartTime).seconds) Second(s) "
