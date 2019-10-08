@@ -22,7 +22,6 @@ $RunDate = Get-Date -Format ddMMyy
 $Hostname = HOSTNAME.EXE
 $global:CentralServerName = "\\" + $Hostname + "\"
 $global:InstallDir = $env:ALLUSERSPROFILE + "\" + "BPUpdater\"
-$global:Dir = $global:InstallDir + "BPDrugUpdates\"
 $LogName = "Log.file"
 $LogDir = $global:InstallDir + "Log\"
 $LogFile = $LogDir + $LogName
@@ -68,17 +67,6 @@ $Record = [ordered] @{
 # Creates Function for querying current PBSVersion
 function Get-PBSVersion {
     Get-ItemProperty -Path "HKLM:\SOFTWARE\WOW6432Node\Best Practice Software\Best Practice\General" -Name "PBS"
-}
-
-# Query if paths exists, if it does not, creates it
-If (!(Test-Path $global:Dir)) {
-    $functionTime = Get-Date -Format g 
-    New-Item -ItemType Directory -Force -Path $global:Dir
-    Add-Content $LogFile "$functionTime > WARNING: Directory $($global:Dir) Not Found, Created automatically"
-}
-else {
-    $functionTime = Get-Date -Format g
-    Add-Content $LogFile "$functionTime > Directory $($global:Dir) OK"
 }
 
 # Query all links on site that contain inc.exe, save uri in variable and split path to set filename in a variable
